@@ -1,7 +1,36 @@
 use std::env;
 
-enum Mode {
-    Celsius, Fahrenheit, Kelvin
+enum Temp {
+    Celsius(f64), 
+    Fahrenheit(f64), 
+    Kelvin(f64)
+}
+
+impl Temp {
+    fn show_all(&self) -> String {
+        let (c, f, k): (f64, f64, f64);
+
+        match self {
+            Temp::Celsius(temp) => {
+                c = *temp;
+                k = c + 273.0;
+                f = 1.8 * c + 32.0;
+            }
+            Temp::Fahrenheit(temp) => {
+                f = *temp;
+                c = (f - 32.0) / 1.8;
+                k = c + 273.0;
+                
+            }
+            Temp::Kelvin(temp) => {
+                k = *temp;
+                c = k - 273.0;
+                f = 1.8 * c + 32.0;
+            }
+        };
+
+        format!("{:.2}c {:.2}f {:.2}k", c, f, k)
+    }
 }
 
 fn main() {
@@ -13,35 +42,15 @@ fn main() {
 
     let mut input = args[1].clone();
     
-    let mode = match input.pop() {
-        Some('c') => Mode::Celsius,
-        Some('f') => Mode::Fahrenheit,
-        Some('k') => Mode::Kelvin,
+    let mode = input.pop();
+    let num: f64 = input.parse().expect("err parsing number");
+
+    let temp = match mode  {
+        Some('c') => Temp::Celsius(num),
+        Some('f') => Temp::Fahrenheit(num),
+        Some('k') => Temp::Kelvin(num),
         Some(_) | None => panic!("temp must end in c, f or k"),
     };
 
-    let num: f64 = input.parse().expect("err parsing number");
-
-    let (c, f, k): (f64, f64, f64);
-
-    match mode {
-        Mode::Celsius => {
-            c = num;
-            k = c + 273.0;
-            f = 1.8 * c + 32.0;
-        }
-        Mode::Fahrenheit => {
-            f = num;
-            c = (f - 32.0) / 1.8;
-            k = c + 273.0;
-            
-        }
-        Mode::Kelvin => {
-            k = num;
-            c = k - 273.0;
-            f = 1.8 * c + 32.0;
-        }
-    }
-
-    println!("{:.2}c {:.2}f {:.2}k", c, f, k);
+    println!("{}", temp.show_all());
 }
